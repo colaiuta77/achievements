@@ -1,0 +1,76 @@
+<!-- 현재 사용자의 독서 업적과 진행률을 탐색하는 풀페이지 화면입니다. -->
+<main class="achievements-page" id="achievements-page">
+  <header class="achievements-hero">
+    <div class="achievements-brand">
+      <div class="achievements-brand-icon" aria-hidden="true">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      <div>
+        <p class="achievements-eyebrow">BOOKOASIS ACHIEVEMENTS</p>
+        <h1>독서 업적</h1>
+        <p id="achievements-user-copy">나의 독서 여정을 불러오는 중입니다.</p>
+      </div>
+    </div>
+
+    <nav class="achievements-filters" aria-label="업적 상태 필터">
+      <button class="achievements-filter is-active" type="button" data-filter="all" aria-pressed="true">
+        전체 <span id="achievement-count-all">0</span>
+      </button>
+      <button class="achievements-filter" type="button" data-filter="unlocked" aria-pressed="false">
+        달성 <span id="achievement-count-unlocked">0</span>
+      </button>
+      <button class="achievements-filter" type="button" data-filter="in_progress" aria-pressed="false">
+        진행 중 <span id="achievement-count-progress">0</span>
+      </button>
+      <button class="achievements-filter" type="button" data-filter="locked" aria-pressed="false">
+        잠김 <span id="achievement-count-locked">0</span>
+      </button>
+    </nav>
+
+    <div class="achievements-overall" aria-label="전체 업적 진행률">
+      <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+      <div>
+        <strong id="achievements-overall-count">0 / 0</strong>
+        <span id="achievements-overall-percent">0% 달성</span>
+      </div>
+      <button id="achievements-refresh" type="button" aria-label="업적 새로고침">
+        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+      </button>
+    </div>
+  </header>
+
+  <section class="achievements-metrics" aria-label="독서 지표 요약">
+    <article>
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <span>완독</span>
+      <strong id="metric-books-completed">-</strong>
+    </article>
+    <article>
+      <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+      <span>고정 페이지</span>
+      <strong id="metric-fixed-pages">-</strong>
+    </article>
+    <article>
+      <i class="fa-solid fa-fire" aria-hidden="true"></i>
+      <span>현재 연속 독서</span>
+      <strong id="metric-current-streak">-</strong>
+    </article>
+    <article>
+      <i class="fa-solid fa-headphones" aria-hidden="true"></i>
+      <span>오디오북 완청</span>
+      <strong id="metric-audio-completed">-</strong>
+    </article>
+    <article class="achievements-next">
+      <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
+      <span>다음 업적</span>
+      <strong id="metric-next-achievement">-</strong>
+    </article>
+  </section>
+
+  <div class="achievements-state" id="achievements-state" role="status">
+    <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+    업적을 계산하는 중입니다.
+  </div>
+
+  <section class="achievements-categories" id="achievements-categories" aria-live="polite"></section>
+</main>
