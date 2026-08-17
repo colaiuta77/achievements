@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 
-DEFINITION_REVISION = 1
+DEFINITION_REVISION = 2
 
 
 ACHIEVEMENT_DEFINITIONS = (
@@ -248,6 +248,61 @@ ACHIEVEMENT_DEFINITIONS = (
         "unit": "권",
         "rarity": "legendary",
     },
+    {
+        "key": "video_started_1",
+        "category": "video",
+        "title": "첫 번째 상영",
+        "description": "첫 비디오를 시청해 보세요.",
+        "icon": "fa-solid fa-circle-play",
+        "metric": "videos_started",
+        "target": 1,
+        "unit": "편",
+        "rarity": "common",
+    },
+    {
+        "key": "video_completed_1",
+        "category": "video",
+        "title": "엔딩 크레딧",
+        "description": "비디오 한 편을 끝까지 시청해 보세요.",
+        "icon": "fa-solid fa-clapperboard",
+        "metric": "videos_completed",
+        "target": 1,
+        "unit": "편",
+        "rarity": "common",
+    },
+    {
+        "key": "video_completed_5",
+        "category": "video",
+        "title": "주말 상영관",
+        "description": "비디오 5편을 완주해 보세요.",
+        "icon": "fa-solid fa-film",
+        "metric": "videos_completed",
+        "target": 5,
+        "unit": "편",
+        "rarity": "rare",
+    },
+    {
+        "key": "video_completed_10",
+        "category": "video",
+        "title": "정주행의 시작",
+        "description": "비디오 10편을 완주해 보세요.",
+        "icon": "fa-solid fa-forward-fast",
+        "metric": "videos_completed",
+        "target": 10,
+        "unit": "편",
+        "rarity": "epic",
+    },
+    {
+        "key": "video_completed_25",
+        "category": "video",
+        "title": "오아시스 시네마테크",
+        "description": "비디오 25편을 완주해 보세요.",
+        "icon": "fa-solid fa-award",
+        "metric": "videos_completed",
+        "target": 25,
+        "unit": "편",
+        "rarity": "legendary",
+    },
 )
 
 
@@ -258,4 +313,5 @@ CATEGORY_DEFINITIONS = (
     {"key": "streak", "title": "연속 독서", "icon": "fa-solid fa-fire"},
     {"key": "explorer", "title": "탐험", "icon": "fa-solid fa-route"},
     {"key": "audio", "title": "오디오북", "icon": "fa-solid fa-headphones-simple"},
+    {"key": "video", "title": "비디오북", "icon": "fa-solid fa-film"},
 )

@@ -11,7 +11,7 @@ from plugins.metadata.base import BaseMetadataProvider
 from .definitions import ACHIEVEMENT_DEFINITIONS, CATEGORY_DEFINITIONS, DEFINITION_REVISION
 
 
-PLUGIN_VERSION = "1.1.0"
+PLUGIN_VERSION = "1.2.0"
 logger = logging.getLogger(__name__)
 
 _UNLOCK_TABLE = "plugin_achievement_unlocks"
@@ -31,6 +31,7 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
         "title": "독서 업적",
         "icon": "fa-solid fa-trophy",
         "order": 85,
+        "sessions": "all",
     }
     update_manifest = {
         "enabled": True,
@@ -113,7 +114,7 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
         return self._row_dict(row)
 
     def _accessible_db_types(self, user):
-        db_types = ["general"]
+        db_types = ["general", "video"]
         if self._is_admin(user) or self._int(user.get("has_adult_access")) == 1:
             db_types.append("adult")
         if self._is_admin(user) or self._int(user.get("has_audiobook_access"), 1) == 1:
@@ -222,6 +223,27 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
             {permission_join}
             WHERE p.user_id = ?
               AND COALESCE(a.is_deleted, 0) = 0
+            """,
+            (self._int(user["id"]),),
+        ) or []
+        return [dict(row) for row in rows]
+
+    def _fetch_video_rows(self, user):
+        gateway = self.get_db_gateway("video")
+        permission_join = self._permission_join(user, book_alias="v", progress_alias="p")
+        rows = gateway.fetch_all(
+            f"""
+            SELECT
+                p.video_id,
+                p.current_episode_id,
+                p.total_progress_pct,
+                p.is_completed,
+                p.last_watched_at
+            FROM video_progress p
+            JOIN videos v ON v.id = p.video_id
+            {permission_join}
+            WHERE p.user_id = ?
+              AND COALESCE(v.is_deleted, 0) = 0
             """,
             (self._int(user["id"]),),
         ) or []
@@ -380,6 +402,17 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
         audiobook_completed = [
             row for row in audiobook_rows if self._int(row.get("is_completed")) == 1
         ]
+        video_rows = self._fetch_video_rows(user)
+        video_started = [
+            row for row in video_rows
+            if row.get("current_episode_id") is not None
+            or self._float(row.get("total_progress_pct")) > 0
+            or self._int(row.get("is_completed")) == 1
+            or bool(row.get("last_watched_at"))
+        ]
+        video_completed = [
+            row for row in video_rows if self._int(row.get("is_completed")) == 1
+        ]
         current_streak, longest_streak = self._calculate_streaks(read_dates)
 
         return {
@@ -393,6 +426,8 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
             "distinct_tags": len(tags),
             "audiobooks_started": len(audiobook_started),
             "audiobooks_completed": len(audiobook_completed),
+            "videos_started": len(video_started),
+            "videos_completed": len(video_completed),
         }
 
     def _ensure_storage(self):
