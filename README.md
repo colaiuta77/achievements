@@ -2,19 +2,19 @@
 
 BookOasis에 저장된 독서 진행 기록을 이용해 사용자별 업적, 배지, 연속 독서와 다음 목표를 보여주는 독립 카테고리 플러그인입니다.
 
-![독서 업적 전용 탭](docs/achievements-tab.png?v=1.2.0)
+![독서 업적 전용 탭](docs/achievements-tab.png?v=1.2.1)
 
 ## 버전 및 호환 정보
 
 | 항목 | 값 |
 | --- | --- |
-| 플러그인 버전 | `1.2.0` |
+| 플러그인 버전 | `1.2.1` |
 | 플러그인 ID | `achievements` |
 | 클래스 | `AchievementsMetadataProvider` |
 | 모듈 | `plugins.metadata.achievements.achievements` |
 | 유형 | 사용자별 독서 업적 카테고리 UI 제공자 |
-| 확인한 BookOasis 버전 | `2.1.4` |
-| 문서 작성일 | `2026-08-17` |
+| 확인한 BookOasis 버전 | `2.5.8` |
+| 문서 작성일 | `2026-09-07` |
 
 이 플러그인은 BookOasis의 권장 폴더형 플러그인 구조와 `PluginDatabaseGateway`를 사용합니다. BookOasis 공통 UI나 코어 파일을 수정하지 않으며 Activity 및 Activity Desk 플러그인에 의존하지 않습니다.
 
@@ -33,6 +33,7 @@ BookOasis에 저장된 독서 진행 기록을 이용해 사용자별 업적, �
 - 일반·성인 도서의 Redis pending 진행률을 DB 결과에 병합합니다.
 - 이미 달성한 업적은 영구 보존하고 `(user_id, achievement_key)` 기본 키로 중복 지급을 막습니다.
 - 사용자 권한에 따라 접근 가능한 일반·성인·오디오북·비디오북 서재만 집계합니다.
+- 사용자별 업적 결과를 BookOasis 플러그인 전용 Redis에 30초 캐시하며 새로고침으로 즉시 재계산할 수 있습니다.
 - 데스크톱 5열부터 모바일 1열까지 반응형 카드 화면을 제공합니다.
 
 ## 화면 구성
@@ -103,6 +104,7 @@ Docker 환경에서는 BookOasis 소스가 연결된 호스트 볼륨 또는 컨
 - 비디오북은 `videos`, `video_progress`의 현재 에피소드·진행률·완주 상태를 조회하며 Redis overlay를 적용하지 않습니다.
 - 일반·성인 도서의 `sync:progress:pending`과 `user:progress` Redis 키를 읽어 아직 flush되지 않은 진행률을 병합합니다.
 - Redis를 사용할 수 없거나 데이터가 손상된 경우 해당 항목을 건너뛰고 DB 결과를 사용합니다.
+- 업적 결과 캐시는 사용자 ID와 업적 정의 revision별로 분리되며 Redis를 사용할 수 없으면 원본 집계로 자동 폴백합니다.
 - 삭제된 도서와 사용자에게 접근 권한이 없는 서재는 집계에서 제외합니다.
 - 사용자별 해금 상태는 활성 general DB의 `plugin_achievement_unlocks` 테이블에 저장합니다.
 - SQLite 구성에서는 general SQLite DB에, MariaDB 구성에서는 general MariaDB에 저장합니다.
@@ -133,6 +135,12 @@ node --check script.js
 SQLite fixture 테스트와 개발용 QA 문서는 로컬에서 검증했으며 GitHub 배포본에는 포함하지 않습니다. MariaDB는 공용 SQL 정적 호환성을 확인했으며 실제 MariaDB 연결 통합 테스트와는 구분합니다.
 
 ## 변경 이력
+
+### 1.2.1 - 2026-09-07
+
+- BookOasis 공식 `cache_get`, `cache_set`, `cache_delete` 계약으로 사용자별 업적 결과를 30초간 재사용.
+- 새로고침 버튼에서 캐시를 삭제하고 최신 DB·pending 진행률로 즉시 재계산.
+- Redis 미연결 또는 손상된 캐시 데이터는 기존 집계 경로로 안전하게 폴백.
 
 ### 1.2.0 - 2026-08-17
 
