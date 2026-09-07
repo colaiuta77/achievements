@@ -230,12 +230,13 @@
     );
   }
 
-  async function loadAchievements() {
+  async function loadAchievements(forceRefresh = false) {
     const requestId = ++state.requestId;
     elements.refresh.disabled = true;
     showState('업적을 계산하는 중입니다.', 'fa-solid fa-circle-notch fa-spin');
     try {
-      const response = await fetch('/api/media/dashboard/widgets/achievements/data?type=general&limit=100', {
+      const refreshQuery = forceRefresh ? '&refresh=1' : '';
+      const response = await fetch(`/api/media/dashboard/widgets/achievements/data?type=general&limit=100${refreshQuery}`, {
         credentials: 'same-origin',
         headers: { Accept: 'application/json' },
       });
@@ -266,6 +267,6 @@
       render();
     });
   });
-  elements.refresh.addEventListener('click', loadAchievements);
+  elements.refresh.addEventListener('click', () => loadAchievements(true));
   loadAchievements();
 })();

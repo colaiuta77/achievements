@@ -11,11 +11,12 @@ from plugins.metadata.base import BaseMetadataProvider
 from .definitions import ACHIEVEMENT_DEFINITIONS, CATEGORY_DEFINITIONS, DEFINITION_REVISION
 
 
-PLUGIN_VERSION = "1.2.0"
+PLUGIN_VERSION = "1.2.1"
 logger = logging.getLogger(__name__)
 
 _UNLOCK_TABLE = "plugin_achievement_unlocks"
 _FIXED_PAGE_FORMATS = {"7z", "cbz", "cbr", "pdf", "rar", "tar", "zip"}
+_CACHE_TTL_SECONDS = 30
 
 
 class AchievementsMetadataProvider(BaseMetadataProvider):
@@ -543,6 +544,21 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
             if user is None:
                 return {"success": False, "error": "로그인 후 독서 업적을 확인할 수 있습니다."}
 
+            cache_key = f"dashboard:v{DEFINITION_REVISION}:user:{self._int(user['id'])}"
+            from flask import has_request_context, request
+
+            force_refresh = has_request_context() and request.args.get("refresh") == "1"
+            if force_refresh:
+                self.cache_delete(cache_key)
+            cached = None if force_refresh else self.cache_get(cache_key)
+            if cached:
+                try:
+                    payload = json.loads(cached)
+                    if isinstance(payload, dict) and payload.get("success") is True:
+                        return payload
+                except (TypeError, ValueError):
+                    pass
+
             metrics = self._collect_metrics(user)
             unlocks = self._unlock_earned(self._int(user["id"]), metrics)
             achievements = [
@@ -562,7 +578,7 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
                 None,
             )
 
-            return {
+            result = {
                 "success": True,
                 "user": {"username": str(user.get("username") or "")},
                 "summary": {
@@ -578,6 +594,12 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
                 "next_achievement": next_achievement,
                 "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
+            self.cache_set(
+                cache_key,
+                json.dumps(result, ensure_ascii=False, separators=(",", ":")),
+                ttl=_CACHE_TTL_SECONDS,
+            )
+            return result
         except Exception:
             logger.exception("독서 업적을 계산하지 못했습니다.")
             return {"success": False, "error": "독서 업적을 계산하지 못했습니다. BookOasis 로그를 확인해 주세요."}
