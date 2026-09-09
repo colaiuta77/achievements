@@ -73,6 +73,7 @@
     if (item.unit === '일') return `${current} / ${target}일`;
     if (item.unit === '장르') return `${current} / ${target}개 장르`;
     if (item.unit === '태그') return `${current} / ${target}개 태그`;
+    if (item.unit === '편') return `${current} / ${target}편`;
     return `${current} / ${target}권`;
   }
 
@@ -136,6 +137,11 @@
       date.className = 'achievement-unlocked-date';
       date.textContent = `${formatDate(item.unlocked_at)} 달성`;
       bottom.appendChild(date);
+    } else if (item.hidden) {
+      const mystery = document.createElement('span');
+      mystery.className = 'achievement-unlocked-date';
+      mystery.textContent = '조건 달성 시 비밀이 공개됩니다';
+      bottom.appendChild(mystery);
     } else {
       const meta = document.createElement('div');
       meta.className = 'achievement-progress-meta';
@@ -226,7 +232,7 @@
       elements.nextAchievement,
       data.next_achievement
         ? `${data.next_achievement.title} · ${formatNumber(data.next_achievement.remaining)} 남음`
-        : '모든 업적 달성',
+        : (number(summary.locked) ? '남은 히든 미션을 찾아보세요' : '모든 업적 달성'),
     );
   }
 
