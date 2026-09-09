@@ -11,7 +11,7 @@ from plugins.metadata.base import BaseMetadataProvider
 from .definitions import ACHIEVEMENT_DEFINITIONS, CATEGORY_DEFINITIONS, DEFINITION_REVISION
 
 
-PLUGIN_VERSION = "1.2.1"
+PLUGIN_VERSION = "1.3.0"
 logger = logging.getLogger(__name__)
 
 _UNLOCK_TABLE = "plugin_achievement_unlocks"
@@ -504,6 +504,14 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
         target = max(1.0, AchievementsMetadataProvider._float(definition["target"], 1))
         unlock = unlocks.get(definition["key"])
         unlocked = unlock is not None
+        if definition.get("hidden") and not unlocked:
+            return {
+                "key": definition["key"], "category": definition["category"],
+                "title": "미지의 업적", "description": definition["hint"],
+                "icon": "fa-solid fa-question", "rarity": "common", "hidden": True,
+                "status": "locked", "unlocked": False, "unlocked_at": "",
+                "current": 0, "target": 0, "remaining": 0, "progress_percent": 0,
+            }
         progress_percent = 100 if unlocked else min(99, round((current / target) * 100))
         if unlocked:
             status = "unlocked"
@@ -571,7 +579,7 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
             next_achievement = next(
                 (
                     item for item in sorted(
-                        (entry for entry in achievements if not entry["unlocked"]),
+                        (entry for entry in achievements if not entry["unlocked"] and not entry.get("hidden")),
                         key=lambda entry: (-entry["progress_percent"], entry["remaining"], entry["target"]),
                     )
                 ),

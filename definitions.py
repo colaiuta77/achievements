@@ -2,10 +2,25 @@
 from __future__ import annotations
 
 
-DEFINITION_REVISION = 2
+DEFINITION_REVISION = 3
 
 
 ACHIEVEMENT_DEFINITIONS = (
+    {"key": "secret_lucky_pages", "category": "secret", "title": "럭키 세븐",
+     "description": "고정 페이지 도서에서 777페이지를 읽었습니다.",
+     "hint": "페이지 사이에서 행운의 숫자를 찾아보세요.", "hidden": True,
+     "icon": "fa-solid fa-clover", "metric": "fixed_pages_read", "target": 777,
+     "unit": "페이지", "rarity": "rare"},
+    {"key": "secret_answer", "category": "secret", "title": "우주와 독서의 해답",
+     "description": "책 42권을 완독했습니다. 답을 찾으셨나요?",
+     "hint": "책장 어딘가에 우주의 해답이 있습니다.", "hidden": True,
+     "icon": "fa-solid fa-rocket", "metric": "books_completed", "target": 42,
+     "unit": "권", "rarity": "legendary"},
+    {"key": "secret_tags", "category": "secret", "title": "취향의 잡화점",
+     "description": "완독한 책에서 서로 다른 태그 20개를 만났습니다.",
+     "hint": "취향의 서랍을 다채롭게 채워보세요.", "hidden": True,
+     "icon": "fa-solid fa-gem", "metric": "distinct_tags", "target": 20,
+     "unit": "태그", "rarity": "epic"},
     {
         "key": "reading_started_1",
         "category": "reading",
@@ -307,6 +322,7 @@ ACHIEVEMENT_DEFINITIONS = (
 
 
 CATEGORY_DEFINITIONS = (
+    {"key": "secret", "title": "히든 미션", "icon": "fa-solid fa-user-secret"},
     {"key": "reading", "title": "첫걸음", "icon": "fa-solid fa-book-open-reader"},
     {"key": "completion", "title": "완독", "icon": "fa-solid fa-trophy"},
     {"key": "volume", "title": "독서량", "icon": "fa-solid fa-file-circle-check"},

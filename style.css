@@ -1,5 +1,7 @@
 /* 독서 업적 풀페이지의 카드 그리드와 BookOasis 테마 연동 스타일을 정의합니다. */
 .achievements-page {
+  --card-outline: color-mix(in srgb, var(--app-border) 92%, var(--app-text-primary) 8%);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   width: 100%;
   box-sizing: border-box;
   min-height: 100%;
@@ -281,6 +283,7 @@
 }
 
 .achievement-card {
+  --achievement-color: var(--app-accent);
   position: relative;
   display: flex;
   min-width: 0;
@@ -304,20 +307,48 @@
 }
 
 .achievement-card.rarity-rare {
+  --achievement-color: #f97316;
   border-color: color-mix(in srgb, #f97316 68%, var(--app-border));
 }
 
 .achievement-card.rarity-epic {
+  --achievement-color: #8b5cf6;
   border-color: color-mix(in srgb, #8b5cf6 68%, var(--app-border));
 }
 
 .achievement-card.rarity-legendary {
+  --achievement-color: #eab308;
   border-color: color-mix(in srgb, #eab308 76%, var(--app-border));
 }
 
 .achievement-card.status-locked {
   border-color: var(--app-border-light);
   opacity: 0.58;
+}
+
+.achievements-hero,
+.achievements-metrics article {
+  border: 1px solid var(--card-outline);
+  box-shadow: var(--card-shadow);
+}
+
+[data-app-theme="dark"] .achievements-hero,
+[data-app-theme="dark"] .achievements-metrics article {
+  background: color-mix(in srgb, var(--app-bg-card) 97%, white 3%);
+}
+
+.achievement-card.status-unlocked {
+  border-color: var(--achievement-color);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--achievement-color) 45%, transparent),
+    0 0 16px color-mix(in srgb, var(--achievement-color) 20%, transparent), var(--card-shadow);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--achievement-color) 12%, transparent), transparent 65%), var(--app-bg-card);
+}
+
+.status-unlocked .achievement-check {
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--app-bg-card);
+  color: var(--achievement-color);
 }
 
 .achievement-card-top {
