@@ -11,7 +11,7 @@ from plugins.metadata.base import BaseMetadataProvider
 from .definitions import ACHIEVEMENT_DEFINITIONS, CATEGORY_DEFINITIONS, DEFINITION_REVISION
 
 
-PLUGIN_VERSION = "1.3.0"
+PLUGIN_VERSION = "1.3.1"
 logger = logging.getLogger(__name__)
 
 _UNLOCK_TABLE = "plugin_achievement_unlocks"
@@ -546,11 +546,41 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
             )
         return categories
 
+    def _problem_stage(self, user_id, code, operation):
+        target = {"db_type": "general", "target_type": "system", "target_id": f"user:{user_id}"}
+        try:
+            result = operation()
+        except Exception:
+            report = getattr(self, "report_problem", None)
+            if callable(report):
+                try:
+                    report(code, title="업적 집계 실패" if code == "aggregation_failed" else "업적 해금 저장 실패",
+                           detail="DB 연결·권한과 BookOasis 로그를 확인한 뒤 해당 사용자의 업적을 새로고침하세요.",
+                           severity="action_required", **target)
+                except Exception:
+                    logger.warning("업적 문제 알림을 기록하지 못했습니다.", exc_info=True)
+            raise
+        resolve = getattr(self, "resolve_problem", None)
+        if callable(resolve):
+            try:
+                resolve(code, **target)
+            except Exception:
+                logger.warning("업적 문제 알림을 해결하지 못했습니다.", exc_info=True)
+        return result
+
     def get_dashboard_data(self, db_type, limit=100):
         try:
             user = self._current_user()
             if user is None:
                 return {"success": False, "error": "로그인 후 독서 업적을 확인할 수 있습니다."}
+
+            user_id = self._int(user["id"])
+            if not self._is_admin(user):
+                permission = self.get_db_gateway("general").get_setting(
+                    f"PERM_CATEGORY_{user_id}_plugin_{self.id}", None
+                )
+                if permission is not None and str(permission["value"]) == "0":
+                    return {"success": False, "error": "독서 업적에 접근할 권한이 없습니다."}
 
             cache_key = f"dashboard:v{DEFINITION_REVISION}:user:{self._int(user['id'])}"
             from flask import has_request_context, request
@@ -567,8 +597,8 @@ class AchievementsMetadataProvider(BaseMetadataProvider):
                 except (TypeError, ValueError):
                     pass
 
-            metrics = self._collect_metrics(user)
-            unlocks = self._unlock_earned(self._int(user["id"]), metrics)
+            metrics = self._problem_stage(user_id, "aggregation_failed", lambda: self._collect_metrics(user))
+            unlocks = self._problem_stage(user_id, "storage_failed", lambda: self._unlock_earned(user_id, metrics))
             achievements = [
                 self._achievement_payload(definition, metrics, unlocks)
                 for definition in ACHIEVEMENT_DEFINITIONS
